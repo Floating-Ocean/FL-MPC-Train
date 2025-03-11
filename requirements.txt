@@ -1,0 +1,6 @@
+torch~=2.3.0+cu121
+numpy~=1.26.4
+enlighten~=1.13.0
+matplotlib~=3.8.4
+torchvision~=0.18.0
+cupy-cuda12x
