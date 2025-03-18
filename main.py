@@ -229,9 +229,10 @@ def solve():
         origin_test_data = datasets.MNIST('../data/mnist/', train=False, download=True, transform=trans_mnist)
         train_dataloader, test_dataloader = DataLoader(origin_train_data), DataLoader(origin_test_data)
         # 为各用户采样数据
-        data_indices = split_iid_data(args, train_dataloader)
-        train_data = split_data(args, data_indices, train_dataloader)
-        test_data = split_data(args, data_indices, test_dataloader, False)
+        train_data_indices = split_iid_data(args, train_dataloader)
+        test_data_indices = split_iid_data(args, test_dataloader)
+        train_data = split_data(args, train_data_indices, train_dataloader)
+        test_data = split_data(args, test_data_indices, test_dataloader, False)
     else:
         exit('Error: unrecognized dataset')
 
@@ -252,7 +253,8 @@ def solve():
     client_models: dict[int, ModelWrapper] = {i: ModelWrapper(model=copy.deepcopy(net_init))
                                               for i in range(args.num_users)}
 
-    mpc_loss_trains, avg_loss_trains, prox_loss_trains = [], [], []  # 用于绘图
+    mpc_acc_trains, avg_acc_trains, prox_acc_trains = [], [], []  # 用于acc绘图
+    mpc_loss_trains, avg_loss_trains, prox_loss_trains = [], [], []  # 用于loss绘图
 
     with manager.counter(total=args.epochs, desc='训练进度', color="bold_cyan", leave=False) as overall_pbar:
         for current_epoch in range(args.epochs):
@@ -344,9 +346,22 @@ def solve():
                                  "Avg_acc: {:.2f}%, loss: {:.4f}".format(avg_acc, avg_loss),
                                  "Prox_acc: {:.2f}%, loss: {:.4f}".format(prox_acc, prox_loss)]))
                 print()
+                mpc_acc_trains.append(mpc_acc / 100.0)
+                avg_acc_trains.append(avg_acc / 100.0)
+                prox_acc_trains.append(prox_acc / 100.0)
                 overall_pbar.update()
 
         print("All OK, 评估中")
+
+        # plot acc curve
+        plt.figure()
+        plt.plot(range(len(mpc_acc_trains)), mpc_acc_trains)
+        plt.plot(range(len(avg_acc_trains)), avg_acc_trains)
+        plt.plot(range(len(prox_acc_trains)), prox_acc_trains)
+        plt.legend(['MPC', 'AVG', 'PROX'])
+        plt.ylabel('Train accuracy')
+        plt.savefig('./save/acc_mpc_avg_prox_{}_{}_{}.png'
+                    .format(args.dataset, args.model, args.epochs))
 
         # plot loss curve
         plt.figure()
@@ -354,8 +369,8 @@ def solve():
         plt.plot(range(len(avg_loss_trains)), avg_loss_trains)
         plt.plot(range(len(prox_loss_trains)), prox_loss_trains)
         plt.legend(['MPC', 'AVG', 'PROX'])
-        plt.ylabel('train_loss')
-        plt.savefig('./save/mpc_avg_prox_{}_{}_{}.png'
+        plt.ylabel('Train loss')
+        plt.savefig('./save/loss_mpc_avg_prox_{}_{}_{}.png'
                     .format(args.dataset, args.model, args.epochs))
 
         # 训练结束，测试准度
