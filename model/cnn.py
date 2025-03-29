@@ -2,12 +2,15 @@ from torch import nn
 
 
 class CNN(nn.Module):  # CNN: 2Conv, 2Pool
-    def __init__(self):
+    def __init__(self,
+                 in_channels: int = 1,
+                 num_classes: int = 10,
+                 img_size: int = 28):
         super(CNN, self).__init__()
 
         self.conv1 = nn.Sequential(
             nn.Conv2d(
-                in_channels=1,  # In: (1, 28, 28)
+                in_channels=in_channels,  # In: (1, 28, 28)
                 out_channels=16,  # Out: (16, 28, 28)
                 kernel_size=5,
                 stride=1,
@@ -29,7 +32,7 @@ class CNN(nn.Module):  # CNN: 2Conv, 2Pool
             nn.MaxPool2d(kernel_size=2)  # Pooling: (32, 7, 7)
         )
 
-        self.output = nn.Linear(in_features=32*7*7, out_features=10)
+        self.output = nn.Linear(in_features=32*(img_size//4)*(img_size//4), out_features=num_classes)
 
     def forward(self, x):
         x = self.conv1(x)

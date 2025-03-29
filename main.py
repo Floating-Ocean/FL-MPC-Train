@@ -9,14 +9,11 @@ from matplotlib import pyplot as plt
 from torch import nn
 from torch.multiprocessing import Value, Process, Queue, set_start_method
 from torch.utils.data import DataLoader
-from torchvision import datasets, transforms
 
-from model.cnn import CNN
 from security.shamir import split_sharing, recover_sharing, recover_weight_shape
+from util.dataset import available_models, DatasetWrapper
 from util.options import args_parser
-from util.sampling import split_iid_data
 from util.test import test_acc
-from util.update import DatasetSplit
 
 
 @dataclass
@@ -43,14 +40,6 @@ def aggregate_models(models: list[tuple[nn.Module, int]]) -> nn.Module:
     aggregated_model = copy.deepcopy(models[0][0])
     aggregated_model.load_state_dict(aggregated_param)
     return aggregated_model
-
-
-def split_data(args: Namespace, indices: dict[int, set],
-               data: DataLoader, is_train: bool = True) -> list[DataLoader]:
-    return [DataLoader(DatasetSplit(data.dataset, idxes),
-                       batch_size=args.local_bs if is_train else args.bs,
-                       shuffle=is_train)
-            for (_, idxes) in indices.items()]
 
 
 def local_train(args: Namespace, model: nn.Module, train_data: DataLoader, global_weights=None, mu=-1.0) -> float:
@@ -223,22 +212,14 @@ def solve():
     args.device = torch.device('cuda:{}'.format(args.gpu) if torch.cuda.is_available() and args.gpu != -1 else 'cpu')
 
     # 加载并划分数据
-    if args.dataset == 'mnist':
-        trans_mnist = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3081,))])
-        origin_train_data = datasets.MNIST('../data/mnist/', train=True, download=True, transform=trans_mnist)
-        origin_test_data = datasets.MNIST('../data/mnist/', train=False, download=True, transform=trans_mnist)
-        train_dataloader, test_dataloader = DataLoader(origin_train_data), DataLoader(origin_test_data)
-        # 为各用户采样数据
-        train_data_indices = split_iid_data(args, train_dataloader)
-        test_data_indices = split_iid_data(args, test_dataloader)
-        train_data = split_data(args, train_data_indices, train_dataloader)
-        test_data = split_data(args, test_data_indices, test_dataloader, False)
+    if args.dataset in available_models:
+        dataset: DatasetWrapper = available_models[args.dataset](args)
     else:
         exit('Error: unrecognized dataset')
 
     # 初始模型
-    if args.model == 'cnn' and args.dataset == 'mnist':
-        net_init = CNN().to(args.device)
+    if args.model == 'cnn':
+        net_init = dataset.init_cnn().to(args.device)
     else:
         exit('Error: unrecognized model')
 
@@ -274,16 +255,16 @@ def solve():
                 terminate_signal = Value('i', 0)
 
                 mpc_thread = Process(target=mpc_threading,
-                                     args=(args, current_epoch, train_data,
+                                     args=(args, current_epoch, dataset.train_data,
                                            {i: client.clone_to_device(torch.device('cpu'))
                                             for i, client in client_models.items()}, communicate_queue,
                                            terminate_signal))
                 avg_thread = Process(target=avg_threading,
-                                     args=(args, train_data,
+                                     args=(args, dataset.train_data,
                                            copy.deepcopy(avg_net_glob).to(torch.device('cpu')),
                                            communicate_queue, terminate_signal))
                 prox_thread = Process(target=prox_threading,
-                                      args=(args, train_data,
+                                      args=(args, dataset.train_data,
                                             {key: copy.deepcopy(val).to(torch.device('cpu'))
                                              for key, val in prox_w_glob.items()},
                                             copy.deepcopy(prox_net_glob).to(torch.device('cpu')),
@@ -338,9 +319,9 @@ def solve():
 
                 # 本轮结束，衡量准确度
                 print(f"OK, 评估中")
-                mpc_acc, mpc_loss = test_acc(args, train_data, client_models[0].model)
-                avg_acc, avg_loss = test_acc(args, train_data, avg_net_glob)
-                prox_acc, prox_loss = test_acc(args, train_data, prox_net_glob)
+                mpc_acc, mpc_loss = test_acc(args, dataset.train_data, client_models[0].model)
+                avg_acc, avg_loss = test_acc(args, dataset.train_data, avg_net_glob)
+                prox_acc, prox_loss = test_acc(args, dataset.train_data, prox_net_glob)
 
                 print('\n'.join(["Mpc_acc: {:.2f}%, loss: {:.4f}".format(mpc_acc, mpc_loss),
                                  "Avg_acc: {:.2f}%, loss: {:.4f}".format(avg_acc, avg_loss),
@@ -375,16 +356,16 @@ def solve():
 
         # 训练结束，测试准度
         client_models[0].model.eval()
-        mpc_acc_train, _ = test_acc(args, train_data, client_models[0].model)
-        mpc_acc_test, _ = test_acc(args, test_data, client_models[0].model)
+        mpc_acc_train, _ = test_acc(args, dataset.train_data, client_models[0].model)
+        mpc_acc_test, _ = test_acc(args, dataset.test_data, client_models[0].model)
 
         avg_net_glob.eval()
-        avg_acc_train, _ = test_acc(args, train_data, avg_net_glob)
-        avg_acc_test, _ = test_acc(args, test_data, avg_net_glob)
+        avg_acc_train, _ = test_acc(args, dataset.train_data, avg_net_glob)
+        avg_acc_test, _ = test_acc(args, dataset.test_data, avg_net_glob)
 
         prox_net_glob.eval()
-        prox_acc_train, _ = test_acc(args, train_data, prox_net_glob)
-        prox_acc_test, _ = test_acc(args, test_data, prox_net_glob)
+        prox_acc_train, _ = test_acc(args, dataset.train_data, prox_net_glob)
+        prox_acc_test, _ = test_acc(args, dataset.test_data, prox_net_glob)
 
         print(
             "训练集Acc: {:.2f} (MPC), {:.2f} (AVG), {:.2f} (PROX)".format(mpc_acc_train, avg_acc_train, prox_acc_train))
