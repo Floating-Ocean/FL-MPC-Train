@@ -1,14 +1,12 @@
 import unittest
-from argparse import Namespace
 
 import torch
-from torch import Tensor
 
 from security.shamir import _shamir_split, recover_sharing
 from util.options import args_parser
 
 
-class Shamir(unittest.TestCase):
+class ShamirTest(unittest.TestCase):
     def test_shamir(self):
         args = args_parser()
         p = torch.randn(10).cuda()
