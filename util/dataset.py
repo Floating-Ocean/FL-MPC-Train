@@ -8,8 +8,8 @@ from torch.utils.data import DataLoader, Dataset
 from torchvision import transforms, datasets
 from torchvision.transforms import Compose
 
-from model.cnn import CNN
-from util.sampling import split_iid_data
+from ..model.cnn import CNN
+from ..util.sampling import split_iid_data
 
 
 class DatasetSplit(Dataset):

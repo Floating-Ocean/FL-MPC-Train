@@ -8,7 +8,7 @@ from torch import nn
 from torch.multiprocessing import Value, Queue
 from torch.utils.data import DataLoader
 
-from security.shamir import split_sharing, recover_sharing, recover_weight_shape
+from .security.shamir import split_sharing, recover_sharing, recover_weight_shape
 
 
 @dataclass

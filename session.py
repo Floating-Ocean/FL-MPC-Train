@@ -8,10 +8,10 @@ from PIL import Image
 from matplotlib import pyplot as plt
 from torch.multiprocessing import Value, Process, Queue
 
-from training import ModelWrapper, mpc_threading
-from util.dataset import available_models, DatasetWrapper
-from util.options import get_default_args
-from util.test import test_acc
+from .training import ModelWrapper, mpc_threading
+from .util.dataset import available_models, DatasetWrapper
+from .util.options import get_default_args
+from .util.test import test_acc
 
 
 def open_session(uuid: UUID, epochs: int, dataset_name: str, model_output_folder: str, status_dict: DictProxy):
