@@ -4,7 +4,7 @@ import time
 import os
 from multiprocessing import Manager, Process
 
-from session import open_session, check_classify_acc, get_available_models
+from train.session import open_session, check_classify_acc, get_available_models
 
 
 class SessionTest(unittest.TestCase):
