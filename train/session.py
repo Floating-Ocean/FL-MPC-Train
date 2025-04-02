@@ -203,11 +203,11 @@ def check_classify_acc(model_path: str, img_path: str, acc_dict: DictProxy):
     acc_dict['result'] = {class_names[i]: round(prob.item(), 4) for i, prob in enumerate(probabilities)}
 
 
-def get_available_models() -> list[tuple[str, str]]:
+def get_available_models() -> list[tuple[str, str, str]]:
     """
     获取当前可用模型以及对应的介绍
 
     Returns:
-        list[tuple[str, str]]: 模型列表 (名称, 介绍)
+        list[tuple[str, str, str]]: 模型列表 (ID, 名称, 介绍)
     """
-    return [(model_name, detail['intro']) for model_name, detail in available_models.items()]
+    return [(model_id, detail['name'], detail['intro']) for model_id, detail in available_models.items()]
