@@ -4,7 +4,7 @@ import time
 import os
 from multiprocessing import Manager, Process
 
-from session import open_session, check_classify_acc
+from session import open_session, check_classify_acc, get_available_models
 
 
 class SessionTest(unittest.TestCase):
@@ -15,6 +15,9 @@ class SessionTest(unittest.TestCase):
         cls.task_id = uuid.uuid4()
         cls.test_output_dir = os.path.join(os.path.dirname(__file__), "test_output")
         os.makedirs(cls.test_output_dir, exist_ok=True)
+
+    def test_step_0_get_models(self):
+        print(get_available_models())
 
     def test_step_1_successful_training(self):
         training_status = self.manager.dict()

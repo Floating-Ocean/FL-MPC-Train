@@ -8,10 +8,10 @@ from PIL import Image
 from matplotlib import pyplot as plt
 from torch.multiprocessing import Value, Process, Queue
 
-from .training import ModelWrapper, mpc_threading
-from .util.dataset import available_models, DatasetWrapper
-from .util.options import get_default_args
-from .util.test import test_acc
+from training import ModelWrapper, mpc_threading
+from util.dataset import available_models, DatasetWrapper
+from util.options import get_default_args
+from util.test import test_acc
 
 
 def open_session(uuid: UUID, epochs: int, dataset_name: str, model_output_folder: str, status_dict: DictProxy):
@@ -43,7 +43,7 @@ def open_session(uuid: UUID, epochs: int, dataset_name: str, model_output_folder
 
         # 加载并划分数据
         if args.dataset in available_models:
-            dataset: DatasetWrapper = available_models[args.dataset](args)
+            dataset: DatasetWrapper = available_models[args.dataset]['referer'](args)
         else:
             raise TypeError('Unknown dataset: {}'.format(args.dataset))
 
@@ -201,3 +201,13 @@ def check_classify_acc(model_path: str, img_path: str, acc_dict: DictProxy):
 
     class_names = dataset.get_classes()
     acc_dict['result'] = {class_names[i]: round(prob.item(), 4) for i, prob in enumerate(probabilities)}
+
+
+def get_available_models() -> list[tuple[str, str]]:
+    """
+    获取当前可用模型以及对应的介绍
+
+    Returns:
+        list[tuple[str, str]]: 模型列表 (名称, 介绍)
+    """
+    return [(model_name, detail['intro']) for model_name, detail in available_models]

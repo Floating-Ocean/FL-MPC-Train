@@ -8,8 +8,8 @@ from torch.utils.data import DataLoader, Dataset
 from torchvision import transforms, datasets
 from torchvision.transforms import Compose
 
-from ..model.cnn import CNN
-from ..util.sampling import split_iid_data
+from model.cnn import CNN
+from util.sampling import split_iid_data
 
 
 class DatasetSplit(Dataset):
@@ -352,14 +352,74 @@ class CelebA(DatasetWrapper):
 
 
 available_models = {
-    'mnist': Mnist,
-    'emnist': EMnist,
-    'qmnist': QMnist,
-    'kmnist': KMnist,
-    'fashionmnist': FashionMnist,
-    'cifar10': Cifar10,
-    'cifar100': Cifar100,
-    'stl10': STL10,
-    'svhn': SVHN,
-    'celeba': CelebA,
+    'mnist': {
+        'referer': Mnist,
+        'intro': (
+            "MNIST 数据集包含 60,000 张 28x28 的灰度手写数字图像，是计算机视觉的基准数据集。"
+            "广泛用于图像分类算法的入门训练和验证。"
+        )
+    },
+    'emnist': {
+        'referer': EMnist,
+        'intro': (
+            "EMNIST 扩展了 MNIST，包含手写字母和数字的混合数据，提供更复杂的分类场景。"
+            "支持包括 ByMerge 和 ByClass 在内的多种数据划分方式。"
+        )
+    },
+    'qmnist': {
+        'referer': QMnist,
+        'intro': (
+            "QMNIST 是 MNIST 的升级版本，保留了原始数据格式同时提供额外元信息。"
+            "包含附加的笔画轨迹数据和测试集扩展，适合研究鲁棒性。"
+        )
+    },
+    'kmnist': {
+        'referer': KMnist,
+        'intro': (
+            "Kuzushiji-MNIST 包含古典日文平假名字符的现代变体图像。"
+            "专为研究古籍数字化和跨文化字符识别设计。"
+        )
+    },
+    'fashionmnist': {
+        'referer': FashionMnist,
+        'intro': (
+            "Fashion-MNIST 用 10 类服装灰度图像替代原始数字，难度更高。"
+            "常用于测试复杂特征提取模型的性能。"
+        )
+    },
+    'cifar10': {
+        'referer': Cifar10,
+        'intro': (
+            "CIFAR-10 包含 60,000 张 32x32 彩色图像，涵盖 10 个常见物体类别。"
+            "适合测试轻量级模型的图像分类能力。"
+        )
+    },
+    'cifar100': {
+        'referer': Cifar100,
+        'intro': (
+            "CIFAR-100 在 CIFAR-10 基础上细化到 100 个精细类别，挑战细粒度分类。"
+            "包含 20 个超类层级结构，支持层次化学习任务。"
+        )
+    },
+    'stl10': {
+        'referer': STL10,
+        'intro': (
+            "STL-10 提供 96x96 高分辨率图像，专为半监督学习设计。"
+            "包含少量标注数据和大量无标签数据，模拟真实场景。"
+        )
+    },
+    'svhn': {
+        'referer': SVHN,
+        'intro': (
+            "Street View House Numbers 数据集来自谷歌街景门牌号照片。"
+            "包含裁剪的数字区域图像和额外干扰数字，测试现实场景识别。"
+        )
+    },
+    'celeba': {
+        'referer': CelebA,
+        'intro': (
+            "CelebFaces Attributes 数据集包含 20 万张名人面部图像。"
+            "提供 40 种属性标签，支持多任务学习和人脸特征分析。"
+        )
+    }
 }

@@ -18,7 +18,7 @@ def solve():
 
     # 加载并划分数据
     if args.dataset in available_models:
-        dataset: DatasetWrapper = available_models[args.dataset](args)
+        dataset: DatasetWrapper = available_models[args.dataset]['referer'](args)
     else:
         exit('Error: unrecognized dataset')
 
