@@ -5,7 +5,7 @@ import torch
 from matplotlib import pyplot as plt
 from torch.multiprocessing import Value, Process, Queue, set_start_method
 
-from training import ModelWrapper, mpc_threading, avg_threading, prox_threading
+from train.training import ModelWrapper, mpc_threading, avg_threading, prox_threading
 from util.dataset import available_models, DatasetWrapper
 from util.options import args_parser
 from util.test import test_acc

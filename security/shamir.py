@@ -3,7 +3,6 @@ from argparse import Namespace
 import cupy as cp
 import torch
 from torch import nn, Tensor
-from torch.utils.dlpack import from_dlpack
 
 
 def flatten_weight(grad: dict[str, Tensor]) -> Tensor:

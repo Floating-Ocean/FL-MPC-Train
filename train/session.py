@@ -8,7 +8,7 @@ from PIL import Image
 from matplotlib import pyplot as plt
 from torch.multiprocessing import Value, Process, Queue
 
-from training import ModelWrapper, mpc_threading
+from train.training import ModelWrapper, mpc_threading
 from util.dataset import available_models, DatasetWrapper
 from util.options import get_default_args
 from util.test import test_acc
@@ -210,4 +210,4 @@ def get_available_models() -> list[tuple[str, str]]:
     Returns:
         list[tuple[str, str]]: 模型列表 (名称, 介绍)
     """
-    return [(model_name, detail['intro']) for model_name, detail in available_models]
+    return [(model_name, detail['intro']) for model_name, detail in available_models.items()]
