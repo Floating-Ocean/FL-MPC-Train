@@ -160,7 +160,9 @@ def open_session(uuid: UUID, epochs: int, dataset_name: str, model_output_folder
             'status': 'FINISHED',
             'data': {
                 'train_acc': mpc_acc_train,
-                'test_acc': mpc_acc_test
+                'test_acc': mpc_acc_test,
+                'acc_trains': training_status['acc_trains'],
+                'loss_trains': training_status['loss_trains']
             }
         }
 
