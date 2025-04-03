@@ -189,7 +189,7 @@ def check_classify_acc(model_path: str, img_path: str, acc_dict: DictProxy):
         'cuda:{}'.format(args.gpu) if torch.cuda.is_available() and args.gpu != -1 else 'cpu')
 
     checkpoint: dict = torch.load(model_path, map_location=args.device)
-    dataset: DatasetWrapper = available_models[checkpoint['dataset']](args)
+    dataset: DatasetWrapper = available_datasets[checkpoint['dataset']](args)
     model = dataset.init_cnn().to(args.device)
     model.load_state_dict(checkpoint['state_dict'])
     model.eval()
