@@ -351,7 +351,7 @@ class CelebA(DatasetWrapper):
         }
 
 
-available_models = {
+available_datasets = {
     'mnist': {
         'referer': Mnist,
         'name': 'MNIST',

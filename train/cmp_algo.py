@@ -6,7 +6,7 @@ from matplotlib import pyplot as plt
 from torch.multiprocessing import Value, Process, Queue, set_start_method
 
 from train.training import ModelWrapper, mpc_threading, avg_threading, prox_threading
-from util.dataset import available_models, DatasetWrapper
+from util.dataset import available_datasets, DatasetWrapper
 from util.options import args_parser
 from util.test import test_acc
 
@@ -17,8 +17,8 @@ def solve():
     args.device = torch.device('cuda:{}'.format(args.gpu) if torch.cuda.is_available() and args.gpu != -1 else 'cpu')
 
     # 加载并划分数据
-    if args.dataset in available_models:
-        dataset: DatasetWrapper = available_models[args.dataset]['referer'](args)
+    if args.dataset in available_datasets:
+        dataset: DatasetWrapper = available_datasets[args.dataset]['referer'](args)
     else:
         exit('Error: unrecognized dataset')
 
