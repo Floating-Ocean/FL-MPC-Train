@@ -4,7 +4,7 @@ import time
 import os
 from multiprocessing import Manager, Process
 
-from train.session import open_session, check_classify_acc, get_available_models
+from train.session import open_session, check_classify_acc, get_available_datasets
 
 
 class SessionTest(unittest.TestCase):
@@ -16,8 +16,8 @@ class SessionTest(unittest.TestCase):
         cls.test_output_dir = os.path.join(os.path.dirname(__file__), "test_output")
         os.makedirs(cls.test_output_dir, exist_ok=True)
 
-    def test_step_0_get_models(self):
-        print(get_available_models())
+    def test_step_0_get_datasets(self):
+        print(get_available_datasets())
 
     def test_step_1_successful_training(self):
         training_status = self.manager.dict()
@@ -100,6 +100,17 @@ class SessionTest(unittest.TestCase):
         acc_dict = self.manager.dict()
         model_path = os.path.join(self.test_output_dir, f"{self.task_id}.pth")
         img_path = os.path.join(os.path.dirname(__file__), "test_mnist.png")
+        p = Process(target=check_classify_acc, args=(model_path, img_path, acc_dict))
+        p.start()
+        p.join()
+        self.assertIn("result", acc_dict)
+        print("测试结果: ", acc_dict['result'])
+        print("最有可能是: ", max(acc_dict['result'], key=acc_dict['result'].get))
+
+    def test_step_4_nonsense_img_acc(self):
+        acc_dict = self.manager.dict()
+        model_path = os.path.join(self.test_output_dir, f"{self.task_id}.pth")
+        img_path = os.path.join(os.path.dirname(__file__), "test_nonsense.png")
         p = Process(target=check_classify_acc, args=(model_path, img_path, acc_dict))
         p.start()
         p.join()
