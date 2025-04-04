@@ -14,7 +14,8 @@ from util.options import get_default_args
 from util.test import test_acc
 
 
-def open_session(uuid: UUID, epochs: int, dataset_name: str, model_output_folder: str, status_dict: DictProxy):
+def open_session(uuid: UUID, epochs: int, dataset_name: str, dataset_folder: str,
+                 model_output_folder: str, status_dict: DictProxy):
     """
     新建训练通信，需要在multiprocessing.Process中作为target执行
 
@@ -22,6 +23,7 @@ def open_session(uuid: UUID, epochs: int, dataset_name: str, model_output_folder
         uuid: 本次训练的唯一标识符
         epochs: 训练轮次
         dataset_name: 训练使用的数据集
+        dataset_folder: 数据集的存放位置
         model_output_folder: 训练结束后存储模型的文件夹，导出为 [uuid].pth 文件
         status_dict: 用于通信训练状态
 
@@ -40,6 +42,7 @@ def open_session(uuid: UUID, epochs: int, dataset_name: str, model_output_folder
             'cuda:{}'.format(args.gpu) if torch.cuda.is_available() and args.gpu != -1 else 'cpu')
         args.epochs = epochs
         args.dataset = dataset_name
+        args.dataset_path = dataset_folder
 
         # 加载并划分数据
         if args.dataset in available_datasets:
@@ -174,19 +177,21 @@ def open_session(uuid: UUID, epochs: int, dataset_name: str, model_output_folder
         }
 
 
-def check_classify_acc(model_path: str, img_path: str, acc_dict: DictProxy):
+def check_classify_acc(model_path: str, img_path: str, dataset_folder: str, acc_dict: DictProxy):
     """
     获取模型对给定图片的分类
 
     Args:
         model_path: 模型所在路径，包含文件名
         img_path: 图片所在路径，包含文件名
+        dataset_folder: 数据集的存放位置
         acc_dict: 接受返回值至 result 字段，为包含不同类型的可能性的字典
 
     """
     args = get_default_args()
     args.device = torch.device(
         'cuda:{}'.format(args.gpu) if torch.cuda.is_available() and args.gpu != -1 else 'cpu')
+    args.dataset_path = dataset_folder
 
     checkpoint: dict = torch.load(model_path, map_location=args.device)
     dataset: DatasetWrapper = available_datasets[args.dataset]['referer'](args)

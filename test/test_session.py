@@ -22,7 +22,7 @@ class SessionTest(unittest.TestCase):
     def test_step_1_successful_training(self):
         training_status = self.manager.dict()
         p = Process(target=open_session,
-                    args=(self.task_id, 10, 'mnist', self.test_output_dir, training_status))
+                    args=(self.task_id, 10, 'mnist', 'data', self.test_output_dir, training_status))
         p.start()
 
         try:
@@ -71,7 +71,7 @@ class SessionTest(unittest.TestCase):
         training_status = self.manager.dict()
         # 使用无效数据集测试失败场景
         p = Process(target=open_session,
-                    args=(self.task_id, 2, 'invalid_dataset', self.test_output_dir, training_status))
+                    args=(self.task_id, 2, 'invalid_dataset', 'data', self.test_output_dir, training_status))
         p.start()
 
         try:
@@ -100,7 +100,7 @@ class SessionTest(unittest.TestCase):
         acc_dict = self.manager.dict()
         model_path = os.path.join(self.test_output_dir, f"{self.task_id}.pth")
         img_path = os.path.join(os.path.dirname(__file__), "test_mnist.png")
-        p = Process(target=check_classify_acc, args=(model_path, img_path, acc_dict))
+        p = Process(target=check_classify_acc, args=(model_path, img_path, 'data', acc_dict))
         p.start()
         p.join()
         self.assertIn("result", acc_dict)
@@ -111,7 +111,7 @@ class SessionTest(unittest.TestCase):
         acc_dict = self.manager.dict()
         model_path = os.path.join(self.test_output_dir, f"{self.task_id}.pth")
         img_path = os.path.join(os.path.dirname(__file__), "test_nonsense.png")
-        p = Process(target=check_classify_acc, args=(model_path, img_path, acc_dict))
+        p = Process(target=check_classify_acc, args=(model_path, img_path, 'data', acc_dict))
         p.start()
         p.join()
         self.assertIn("result", acc_dict)

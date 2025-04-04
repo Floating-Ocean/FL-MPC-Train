@@ -76,8 +76,8 @@ class Mnist(DatasetWrapper):
             transforms.ToTensor(),
             transforms.Normalize((0.1307,), (0.3081,))
         ])
-        origin_train_data = datasets.MNIST('../data/', train=True, download=True, transform=trans)
-        origin_test_data = datasets.MNIST('../data/', train=False, download=True, transform=trans)
+        origin_train_data = datasets.MNIST(args.dataset_path, train=True, download=True, transform=trans)
+        origin_test_data = datasets.MNIST(args.dataset_path, train=False, download=True, transform=trans)
         self._train_dataloader, self._test_dataloader = DataLoader(origin_train_data), DataLoader(origin_test_data)
         self._classes = origin_train_data.classes
         self._test_transformer = trans
@@ -102,8 +102,8 @@ class EMnist(DatasetWrapper):
             transforms.ToTensor(),
             transforms.Normalize((0.1736,), (0.3317,))
         ])
-        origin_train_data = datasets.EMNIST('../data/', split='byclass', train=True, download=True, transform=trans)
-        origin_test_data = datasets.EMNIST('../data/', split='byclass', train=False, download=True, transform=trans)
+        origin_train_data = datasets.EMNIST(args.dataset_path, split='byclass', train=True, download=True, transform=trans)
+        origin_test_data = datasets.EMNIST(args.dataset_path, split='byclass', train=False, download=True, transform=trans)
         # EMNIST需要做图像转置（原始数据是转置存储的）
         origin_train_data.data = origin_train_data.data.permute(0, 2, 1)
         origin_test_data.data = origin_test_data.data.permute(0, 2, 1)
@@ -131,8 +131,8 @@ class QMnist(DatasetWrapper):
             transforms.ToTensor(),
             transforms.Normalize((0.1307,), (0.3081,))
         ])
-        origin_train_data = datasets.QMNIST('../data/', train=True, download=True, transform=trans)
-        origin_test_data = datasets.QMNIST('../data/', train=False, download=True, transform=trans)
+        origin_train_data = datasets.QMNIST(args.dataset_path, train=True, download=True, transform=trans)
+        origin_test_data = datasets.QMNIST(args.dataset_path, train=False, download=True, transform=trans)
         self._train_dataloader, self._test_dataloader = DataLoader(origin_train_data), DataLoader(origin_test_data)
         self._classes = origin_train_data.classes
         self._test_transformer = trans
@@ -157,8 +157,8 @@ class KMnist(DatasetWrapper):
             transforms.ToTensor(),
             transforms.Normalize((0.1904,), (0.3475,))
         ])
-        origin_train_data = datasets.KMNIST('../data/', train=True, download=True, transform=trans)
-        origin_test_data = datasets.KMNIST('../data/', train=False, download=True, transform=trans)
+        origin_train_data = datasets.KMNIST(args.dataset_path, train=True, download=True, transform=trans)
+        origin_test_data = datasets.KMNIST(args.dataset_path, train=False, download=True, transform=trans)
         self._train_dataloader, self._test_dataloader = DataLoader(origin_train_data), DataLoader(origin_test_data)
         self._classes = origin_train_data.classes
         self._test_transformer = trans
@@ -183,8 +183,8 @@ class FashionMnist(DatasetWrapper):
             transforms.ToTensor(),
             transforms.Normalize((0.2860,), (0.3530,))
         ])
-        origin_train_data = datasets.FashionMNIST('../data/', train=True, download=True, transform=trans)
-        origin_test_data = datasets.FashionMNIST('../data/', train=False, download=True, transform=trans)
+        origin_train_data = datasets.FashionMNIST(args.dataset_path, train=True, download=True, transform=trans)
+        origin_test_data = datasets.FashionMNIST(args.dataset_path, train=False, download=True, transform=trans)
         self._train_dataloader, self._test_dataloader = DataLoader(origin_train_data), DataLoader(origin_test_data)
         self._classes = origin_train_data.classes
         self._test_transformer = trans
@@ -214,8 +214,8 @@ class Cifar10(DatasetWrapper):
             transforms.ToTensor(),
             transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2470, 0.2435, 0.2616)),
         ])
-        origin_train_data = datasets.CIFAR10('../data/CIFAR10/', train=True, download=True, transform=train_trans)
-        origin_test_data = datasets.CIFAR10('../data/CIFAR10/', train=False, download=True, transform=test_trans)
+        origin_train_data = datasets.CIFAR10(os.path.join(args.dataset_path, 'CIFAR10'), train=True, download=True, transform=train_trans)
+        origin_test_data = datasets.CIFAR10(os.path.join(args.dataset_path, 'CIFAR10'), train=False, download=True, transform=test_trans)
         self._train_dataloader, self._test_dataloader = DataLoader(origin_train_data), DataLoader(origin_test_data)
         self._classes = origin_train_data.classes
         self._test_transformer = test_trans
@@ -245,8 +245,8 @@ class Cifar100(DatasetWrapper):
             transforms.ToTensor(),
             transforms.Normalize((0.5071, 0.4867, 0.4408), (0.2675, 0.2565, 0.2761)),
         ])
-        origin_train_data = datasets.CIFAR100('../data/CIFAR100/', train=True, download=True, transform=train_trans)
-        origin_test_data = datasets.CIFAR100('../data/CIFAR100/', train=False, download=True, transform=test_trans)
+        origin_train_data = datasets.CIFAR100(os.path.join(args.dataset_path, 'CIFAR100'), train=True, download=True, transform=train_trans)
+        origin_test_data = datasets.CIFAR100(os.path.join(args.dataset_path, 'CIFAR100'), train=False, download=True, transform=test_trans)
         self._train_dataloader, self._test_dataloader = DataLoader(origin_train_data), DataLoader(origin_test_data)
         self._classes = origin_train_data.classes
         self._test_transformer = test_trans
@@ -271,8 +271,8 @@ class STL10(DatasetWrapper):
             transforms.ToTensor(),
             transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
         ])
-        origin_train_data = datasets.STL10('../data/STL10/', split='train', download=True, transform=trans)
-        origin_test_data = datasets.STL10('../data/STL10/', split='test', download=True, transform=trans)
+        origin_train_data = datasets.STL10(os.path.join(args.dataset_path, 'STL10'), split='train', download=True, transform=trans)
+        origin_test_data = datasets.STL10(os.path.join(args.dataset_path, 'STL10'), split='test', download=True, transform=trans)
         self._train_dataloader, self._test_dataloader = DataLoader(origin_train_data), DataLoader(origin_test_data)
         self._classes = origin_train_data.classes
         self._test_transformer = trans
@@ -297,8 +297,8 @@ class SVHN(DatasetWrapper):
             transforms.ToTensor(),
             transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
         ])
-        origin_train_data = datasets.SVHN('../data/SVHN/', split='train', download=True, transform=trans)
-        origin_test_data = datasets.SVHN('../data/SVHN/', split='test', download=True, transform=trans)
+        origin_train_data = datasets.SVHN(os.path.join(args.dataset_path, 'SVHN'), split='train', download=True, transform=trans)
+        origin_test_data = datasets.SVHN(os.path.join(args.dataset_path, 'SVHN'), split='test', download=True, transform=trans)
         self._train_dataloader, self._test_dataloader = DataLoader(origin_train_data), DataLoader(origin_test_data)
         self._classes = ['0 - zero', '1 - one', '2 - two', '3 - three', '4 - four', '5 - five', 
                         '6 - six', '7 - seven', '8 - eight', '9 - nine']
@@ -324,16 +324,15 @@ class CelebA(DatasetWrapper):
             transforms.CenterCrop(64),
             transforms.ToTensor(),
         ])
-        origin_train_data = datasets.CelebA('../data/CELEBA/', split='train', download=True, transform=trans)
-        origin_test_data = datasets.CelebA('../data/CELEBA/', split='test', download=True, transform=trans)
+        origin_train_data = datasets.CelebA(os.path.join(args.dataset_path, 'CELEBA'), split='train', download=True, transform=trans)
+        origin_test_data = datasets.CelebA(os.path.join(args.dataset_path, 'CELEBA'), split='test', download=True, transform=trans)
         self._train_dataloader, self._test_dataloader = DataLoader(origin_train_data), DataLoader(origin_test_data)
         self._classes = self._get_celeba_attribute_names()
         self._test_transformer = trans
         self._init_data()
 
-    @classmethod
-    def _get_celeba_attribute_names(cls) -> list[str]:
-        attr_file = os.path.join('../data/CELEBA/celeba/list_attr_celeba.txt')
+    def _get_celeba_attribute_names(self) -> list[str]:
+        attr_file = os.path.join(self._args.dataset_path, 'CELEBA', 'celeba', 'list_attr_celeba.txt')
 
         # 读取属性文件（第一行是标题行）
         with open(attr_file, 'r') as f:

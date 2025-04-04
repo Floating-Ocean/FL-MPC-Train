@@ -1,4 +1,5 @@
 import argparse
+import os
 
 
 def args_parser() -> argparse.Namespace:
@@ -37,6 +38,8 @@ def args_parser() -> argparse.Namespace:
                         help="name of dataset")
     parser.add_argument('--gpu', type=int, default=default_args.gpu,
                         help="GPU ID, -1 for CPU")
+    parser.add_argument('--dataset_path', type=str, default=default_args.dataset_path,
+                        help="Path to save datasets")
     args = parser.parse_args()
     return args
 
@@ -56,5 +59,6 @@ def get_default_args() -> argparse.Namespace:
         prime=2**31-1,
         model='cnn',
         dataset='mnist',
-        gpu=0
+        gpu=0,
+        dataset_path=os.path.join('..', 'data')
     )
