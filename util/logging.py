@@ -48,7 +48,6 @@ os.system("")
 
 
 def init_logger():
-    print(DEFAULT_FILE_HANDLER['filename'])
     configure_logging(
         config=None,
         _format=None,

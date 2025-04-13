@@ -51,6 +51,10 @@ class DatasetWrapper(abc.ABC):
         test_data_indices = split_iid_data(self._args, self._test_dataloader)
         self.train_data = split_data(self._args, train_data_indices, self._train_dataloader)
         self.test_data = split_data(self._args, test_data_indices, self._test_dataloader, False)
+
+    @classmethod
+    def _convert_to_rgb(cls, img):
+        return img.convert("RGB")  # 处理外部可能传入的非RGB图片
         
     def get_classes(self):
         return self._classes
@@ -204,13 +208,13 @@ class Cifar10(DatasetWrapper):
     def __init__(self, args: Namespace):
         super().__init__(args)
         train_trans = transforms.Compose([
-            transforms.Lambda(lambda img: img.convert("RGB")),
             transforms.RandomCrop(32, padding=4),
             transforms.RandomHorizontalFlip(),
             transforms.ToTensor(),
             transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2470, 0.2435, 0.2616)),
         ])
         test_trans = transforms.Compose([
+            transforms.Lambda(self._convert_to_rgb),
             transforms.ToTensor(),
             transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2470, 0.2435, 0.2616)),
         ])
@@ -235,13 +239,13 @@ class Cifar100(DatasetWrapper):
     def __init__(self, args: Namespace):
         super().__init__(args)
         train_trans = transforms.Compose([
-            transforms.Lambda(lambda img: img.convert("RGB")),
             transforms.RandomCrop(32, padding=4),
             transforms.RandomHorizontalFlip(),
             transforms.ToTensor(),
             transforms.Normalize((0.5071, 0.4867, 0.4408), (0.2675, 0.2565, 0.2761)),
         ])
         test_trans = transforms.Compose([
+            transforms.Lambda(self._convert_to_rgb),
             transforms.ToTensor(),
             transforms.Normalize((0.5071, 0.4867, 0.4408), (0.2675, 0.2565, 0.2761)),
         ])
@@ -266,7 +270,7 @@ class STL10(DatasetWrapper):
     def __init__(self, args: Namespace):
         super().__init__(args)
         trans = transforms.Compose([
-            transforms.Lambda(lambda img: img.convert("RGB")),
+            transforms.Lambda(self._convert_to_rgb),
             transforms.Resize((96, 96)),
             transforms.ToTensor(),
             transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
@@ -292,7 +296,7 @@ class SVHN(DatasetWrapper):
     def __init__(self, args: Namespace):
         super().__init__(args)
         trans = transforms.Compose([
-            transforms.Lambda(lambda img: img.convert("RGB")),
+            transforms.Lambda(self._convert_to_rgb),
             transforms.Resize((96, 96)),
             transforms.ToTensor(),
             transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
@@ -319,7 +323,7 @@ class CelebA(DatasetWrapper):
     def __init__(self, args: Namespace):
         super().__init__(args)
         trans = transforms.Compose([
-            transforms.Lambda(lambda img: img.convert("RGB")),
+            transforms.Lambda(self._convert_to_rgb),
             transforms.Resize(64),
             transforms.CenterCrop(64),
             transforms.ToTensor(),
