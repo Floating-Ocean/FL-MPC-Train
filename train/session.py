@@ -9,10 +9,15 @@ from matplotlib import pyplot as plt
 from torch.multiprocessing import Value, Process, Queue
 
 from train.training import ModelWrapper, mpc_threading
+from util import logging
 from util.dataset import available_datasets, DatasetWrapper
+from util.logging import init_logger
 from util.options import get_default_args
 from util.test import test_acc
 
+
+_logger = logging.get_logger()
+init_logger()
 
 def open_session(uuid: UUID, epochs: int, dataset_name: str, dataset_folder: str,
                  model_output_folder: str, status_dict: DictProxy):
@@ -28,8 +33,8 @@ def open_session(uuid: UUID, epochs: int, dataset_name: str, dataset_folder: str
         status_dict: 用于通信训练状态
 
     status_dict包含两个字段：
-    status字段为当前状态，候选为 'INITIALIZING', 'FAILED', 'TRAINING', 'EVALUATING', 'FINISHED'；
-    data字段为当前状态的数据，INITIALIZING和EVALUATING对应None，FAILED对应一个错误提示字符串，其余对应一个dict.
+    status字段为当前状态，候选为 'INITIALIZING', 'FAILED', 'TRAINING', 'EVALUATING', 'TEST_EVALUATING', 'FINISHED'；
+    data字段为当前状态的数据，INITIALIZING对应None，FAILED对应一个错误提示字符串，其余对应一个dict.
 
     """
     status_dict[uuid] = {
@@ -40,6 +45,8 @@ def open_session(uuid: UUID, epochs: int, dataset_name: str, dataset_folder: str
         args = get_default_args()
         args.device = torch.device(
             'cuda:{}'.format(args.gpu) if torch.cuda.is_available() and args.gpu != -1 else 'cpu')
+        _logger.info('Running on: {}'.format(args.device))
+
         args.epochs = epochs
         args.dataset = dataset_name
         args.dataset_path = dataset_folder
@@ -47,12 +54,14 @@ def open_session(uuid: UUID, epochs: int, dataset_name: str, dataset_folder: str
         # 加载并划分数据
         if args.dataset in available_datasets:
             dataset: DatasetWrapper = available_datasets[args.dataset]['referer'](args)
+            _logger.info('Using dataset: {}'.format(dataset))
         else:
             raise TypeError('Unknown dataset: {}'.format(args.dataset))
 
         # 初始模型
         if args.model == 'cnn':
             net_init = dataset.init_cnn().to(args.device)
+            _logger.info('Using model: {}'.format(net_init))
         else:
             raise TypeError('Unknown model: {}'.format(args.model))
 
@@ -69,6 +78,7 @@ def open_session(uuid: UUID, epochs: int, dataset_name: str, dataset_folder: str
         }
 
         for current_epoch in range(args.epochs):
+            _logger.info("Rd. {} Start.".format(current_epoch + 1))
             # 开始本轮训练
             training_status['epoch'] = current_epoch + 1
             training_status['epoch_progress'] = 0.0
@@ -114,7 +124,7 @@ def open_session(uuid: UUID, epochs: int, dataset_name: str, dataset_folder: str
             # 本轮结束，衡量准确度
             status_dict[uuid] = {
                 'status': 'EVALUATING',
-                'data': None
+                'data': training_status
             }
             mpc_thread.join()
 
@@ -146,8 +156,8 @@ def open_session(uuid: UUID, epochs: int, dataset_name: str, dataset_folder: str
 
         # 训练结束，测试准度
         status_dict[uuid] = {
-            'status': 'EVALUATING',
-            'data': None
+            'status': 'TEST_EVALUATING',
+            'data': training_status
         }
         client_models[0].model.eval()
         mpc_acc_train, _ = test_acc(args, dataset.train_data, client_models[0].model)
@@ -168,6 +178,7 @@ def open_session(uuid: UUID, epochs: int, dataset_name: str, dataset_folder: str
                 'loss_trains': training_status['loss_trains']
             }
         }
+        _logger.info("Finished, training info: {}".format(status_dict[uuid]['data']))
 
     except Exception as e:
         error_msg = f"{str(e)}\n{traceback.format_exc()}"
@@ -191,6 +202,8 @@ def check_classify_acc(model_path: str, img_path: str, dataset_folder: str, acc_
     args = get_default_args()
     args.device = torch.device(
         'cuda:{}'.format(args.gpu) if torch.cuda.is_available() and args.gpu != -1 else 'cpu')
+    _logger.info('Running on: {}'.format(args.device))
+
     args.dataset_path = dataset_folder
 
     checkpoint: dict = torch.load(model_path, map_location=args.device)
@@ -208,6 +221,7 @@ def check_classify_acc(model_path: str, img_path: str, dataset_folder: str, acc_
 
     class_names = dataset.get_classes()
     acc_dict['result'] = {class_names[i]: round(prob.item(), 4) for i, prob in enumerate(probabilities)}
+    _logger.info('Test info: {}'.format(acc_dict['result']))
 
 
 def get_available_datasets() -> list[tuple[str, str, str]]:

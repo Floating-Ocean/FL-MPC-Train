@@ -1,4 +1,5 @@
 import copy
+import logging
 from argparse import Namespace
 from dataclasses import dataclass
 
@@ -87,7 +88,7 @@ def mpc_threading(args: Namespace, current_epoch: int, train_data: list[DataLoad
     # 复制传参
     client_models = {i: client.clone_to_device(args.device) for i, client in client_models_p.items()}
 
-    print(f"Rd.{current_epoch + 1} Start.")
+    logging.info(f"Rd.{current_epoch + 1} Start.")
     communicate_queue.put(('mpc', 0))
 
     server_received_split: dict[int, list[cp.ndarray]] = {server_id: [] for server_id in range(args.num_servers)}

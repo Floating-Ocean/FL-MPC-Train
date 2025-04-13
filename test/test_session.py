@@ -22,7 +22,7 @@ class SessionTest(unittest.TestCase):
     def test_step_1_successful_training(self):
         training_status = self.manager.dict()
         p = Process(target=open_session,
-                    args=(self.task_id, 10, 'mnist', 'data', self.test_output_dir, training_status))
+                    args=(self.task_id, 1, 'mnist', 'data', self.test_output_dir, training_status))
         p.start()
 
         try:
